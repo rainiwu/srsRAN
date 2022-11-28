@@ -6,28 +6,60 @@
 
 #include "srsenb/hdr/stack/mac/schedulers/sched_ext_prio.h"
 
+#define ADDR "ipc:///dev/shm/priorities"
+
 namespace srsenb {
 
 sched_ext_prio::sched_ext_prio(const sched_cell_params_t&           cell_params_,
                                const sched_interface::sched_args_t& sched_args) :
   cell_params(&cell_params_)
-{}
+{
+  this->context = std::make_shared<zmq::context_t>(1);
+  this->socket  = zmq::socket_t(*this->context, zmq::socket_type::sub);
+  this->socket.set(zmq::sockopt::subscribe, "");
+  this->socket.connect(ADDR);
+}
+
+size_t sched_ext_prio::get_external_prio(const sched_ue_list& ue_db)
+{
+  zmq::message_t msg;
+  this->socket.recv(msg, zmq::recv_flags::dontwait);
+  if (msg.empty()) {
+    return this->prev_prio;
+  }
+  const int prio_rnti = *msg.data<int>();
+  size_t    prio_idx  = 0;
+  for (const auto& ue : ue_db) {
+    if (prio_rnti == ue.first) {
+      this->prev_prio = prio_idx;
+      return prio_idx;
+    }
+    prio_idx++;
+  }
+  return this->prev_prio;
+}
 
 void sched_ext_prio::sched_dl_users(sched_ue_list& ue_db, sf_sched* tti_sched)
 {
   if (ue_db.empty()) {
     return;
   }
-  sched_dl_retxs(ue_db, tti_sched, 0);
-  sched_dl_newtxs(ue_db, tti_sched, 0);
+
+  auto result = this->get_external_prio(ue_db);
+
+  sched_dl_retxs(ue_db, tti_sched, result);
+  sched_dl_newtxs(ue_db, tti_sched, result);
 }
 void sched_ext_prio::sched_ul_users(sched_ue_list& ue_db, sf_sched* tti_sched)
 {
   if (ue_db.empty()) {
     return;
   }
-  sched_ul_retxs(ue_db, tti_sched, 0);
-  sched_ul_newtxs(ue_db, tti_sched, 0);
+
+  auto result = this->get_external_prio(ue_db);
+
+  sched_ul_retxs(ue_db, tti_sched, result);
+  sched_ul_newtxs(ue_db, tti_sched, result);
 }
 
 /** The following functions are derived from sched_time_rr

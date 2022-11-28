@@ -20,3 +20,4 @@
 
 set(SOURCES sched_base.cc sched_time_rr.cc sched_time_pf.cc sched_ext_prio.cc)
 add_library(mac_schedulers OBJECT ${SOURCES})
+target_link_libraries(mac_schedulers ${ZEROMQ_LIBRARIES})
