@@ -1,0 +1,29 @@
+version: "3.9"
+services:
+  srsenb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: srsran:latest
+    container_name: srsran_enb
+    ipc: "host"
+    network_mode: "host"
+    command: "srsenb"
+    volumes:
+      - ./config/:/etc/srsran/
+  srsepc:
+    user: root
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: srsran:latest
+    container_name: srsran_epc
+    ipc: "host"
+    network_mode: "host"
+    command: "srsepc"
+    volumes:
+      - ./config/:/etc/srsran/
+
+networks:
+  default:
+    driver: bridge

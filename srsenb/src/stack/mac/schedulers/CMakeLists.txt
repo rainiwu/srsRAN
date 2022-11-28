@@ -18,5 +18,5 @@
 # and at http://www.gnu.org/licenses/.
 #
 
-set(SOURCES sched_base.cc sched_time_rr.cc sched_time_pf.cc)
+set(SOURCES sched_base.cc sched_time_rr.cc sched_time_pf.cc sched_ext_prio.cc)
 add_library(mac_schedulers OBJECT ${SOURCES})
