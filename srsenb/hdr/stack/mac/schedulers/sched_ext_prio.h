@@ -22,10 +22,10 @@ public:
   void sched_ul_users(sched_ue_list& ue_db, sf_sched* tti_sched) override;
 
 protected:
-  void sched_dl_retxs(sched_ue_list& ue_db, sf_sched* tti_sched, size_t prio_idx);
-  void sched_dl_newtxs(sched_ue_list& ue_db, sf_sched* tti_sched, size_t prio_idx);
   void sched_ul_retxs(sched_ue_list& ue_db, sf_sched* tti_sched, size_t prio_idx);
   void sched_ul_newtxs(sched_ue_list& ue_db, sf_sched* tti_sched, size_t prio_idx);
+
+  void sched_dl_txs(sched_ue_list& ue_db, sf_sched* tti_sched, size_t prio_idx);
 
   size_t get_external_prio(const sched_ue_list& ue_db);
 
